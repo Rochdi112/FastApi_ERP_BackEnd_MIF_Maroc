@@ -212,3 +212,4 @@ Consulter `DEPLOY_CHECKLIST.md` pour la checklist de production.
 * Licence : à définir
 
 © 2025 MIF Maroc — Backend ERP Interventions
+# FastApi_ERP_BackEnd_MIF_Maroc
