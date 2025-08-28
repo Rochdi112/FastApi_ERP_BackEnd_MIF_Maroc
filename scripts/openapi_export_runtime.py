@@ -12,6 +12,11 @@ import sys
 os.environ.setdefault("ENV", os.getenv("ENV", "test"))
 os.environ.setdefault("DATABASE_URL", os.getenv("DATABASE_URL", "sqlite:///:memory:"))
 
+# Assurer que la racine du projet est dans sys.path pour pouvoir importer 'app'
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
 # Import après configuration de l'env
 from app.main import app  # noqa: E402
 
