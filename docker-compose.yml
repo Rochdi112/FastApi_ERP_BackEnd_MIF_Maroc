@@ -29,7 +29,7 @@ services:
       - "${API_HOST_PORT:-8000}:8000"
     volumes:
       - .:/app
-      - uploads_data:${UPLOAD_DIRECTORY:-app/static/uploads}
+      - uploads_data:/app/static/uploads
 
 volumes:
   db_data:

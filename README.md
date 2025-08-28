@@ -183,6 +183,15 @@ pytest --cov=app --cov-report=term --cov-report=html:htmlcov -q
 
 Le contrat d’API est fourni par `openapi.json` ou `openapi.generated.json`.
 
+### Handoff Frontend
+
+- Base URL: `http://localhost:8000/api/v1`
+- OpenAPI:
+  - Runtime complet: `openapi.json` (export via tâche VS Code "OpenAPI: export (runtime)" ou `python -c ... app.openapi()`)
+  - Fallback AST: `openapi.generated.json` (`python scripts/openapi_export.py`)
+- CORS: autoriser l’URL du frontend dans `.env` (`CORS_ALLOW_ORIGINS`)
+- Auth: flux JWT (bearer) — à configurer dans le client HTTP (Axios)
+
 ---
 
 ## Déploiement

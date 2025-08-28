@@ -40,7 +40,7 @@ def authenticate_user(db: Session, email: str, password: str) -> TokenResponse:
     access_token = create_access_token(
         data={
             "sub": user.email,    # Identifiant principal (RFC JWT)
-            "role": user.role,    # Rôle RBAC
+            "role": getattr(user.role, "value", str(user.role)),  # Rôle RBAC sérialisé en string
             "user_id": user.id    # Id utilisateur unique (utile pour tracking)
         }
     )
@@ -68,7 +68,7 @@ def authenticate_user_by_username(db: Session, username: str, password: str) -> 
     access_token = create_access_token(
         data={
             "sub": user.email,
-            "role": user.role,
+            "role": getattr(user.role, "value", str(user.role)),
             "user_id": user.id,
         }
     )

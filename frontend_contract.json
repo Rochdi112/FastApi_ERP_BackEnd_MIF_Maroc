@@ -88,5 +88,11 @@
     "PlanningCreate": {"frequence": "string", "prochaine_date": "datetime?", "derniere_date": "datetime?", "equipement_id": "number"},
     "PlanningOut": {"id": "number", "frequence": "string", "prochaine_date": "datetime?", "derniere_date": "datetime?", "equipement_id": "number", "date_creation": "datetime"},
     "DocumentOut": {"id": "number", "filename": "string", "path": "string", "date_upload": "datetime", "intervention_id": "number"}
-  }
+  },
+  "ignoreExtras": [
+    {"method": "POST", "path": "/notifications"},
+    {"method": "GET", "path": "/notifications"},
+    {"method": "GET", "path": "/notifications/user/{id}"},
+    {"method": "DELETE", "path": "/notifications/{id}"}
+  ]
 }

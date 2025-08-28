@@ -597,51 +597,5 @@ class Client(Base):
                 # Rapport d'activité synthétique
                 "rapport_activite_6_mois": self.generer_rapport_activite(6),
             })
-            
+        
         return data
-    interventions = relationship(
-        "Intervention", 
-        back_populates="client", 
-        cascade="all, delete-orphan",
-        lazy="dynamic"
-    )
-    contrats = relationship(
-        "Contrat", 
-        back_populates="client", 
-        cascade="all, delete-orphan",
-        lazy="dynamic"
-    )
-
-    def __repr__(self):
-        return f"<Client(id={self.id}, entreprise='{self.nom_entreprise}')>"
-
-    @property
-    def nb_interventions_total(self):
-        """Retourne le nombre total d'interventions pour ce client"""
-        return self.interventions.count()
-
-    @property
-    def interventions_ouvertes(self):
-        """Retourne les interventions ouvertes pour ce client"""
-        from app.models.intervention import StatutIntervention
-        return self.interventions.filter_by(statut=StatutIntervention.ouverte)
-
-    @property
-    def derniere_intervention(self):
-        """Retourne la dernière intervention créée pour ce client"""
-        return self.interventions.order_by(
-            self.interventions.property.mapper.class_.date_creation.desc()
-        ).first()
-
-    def to_dict(self):
-        """Sérialisation simple en dictionnaire"""
-        return {
-            "id": self.id,
-            "nom_entreprise": self.nom_entreprise,
-            "secteur_activite": self.secteur_activite,
-            "contact_principal": self.contact_principal,
-            "email": self.email,
-            "telephone": self.telephone,
-            "ville": self.ville,
-            "is_active": self.is_active
-        }

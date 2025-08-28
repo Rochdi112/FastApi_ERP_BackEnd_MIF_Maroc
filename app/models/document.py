@@ -31,7 +31,7 @@ class Document(Base):
 
     id: int = Column(Integer, primary_key=True, index=True)
     nom_fichier: str = Column(String(255), nullable=False, index=True, doc="Nom du fichier (ex: rapport.pdf)")
-    chemin: str = Column(String(255), nullable=False, doc="Chemin complet vers le fichier sur le serveur")
+    chemin: str = Column(String(255), nullable=False, doc="Chemin relatif (ex: static/uploads/<uuid>.<ext>)")
     date_upload: datetime = Column(DateTime, default=datetime.utcnow, nullable=False, index=True, doc="Date d'upload")
 
     # Clé étrangère vers une intervention
@@ -43,9 +43,11 @@ class Document(Base):
 
     @property
     def url(self) -> str:
-        """URL d'accès public au document (pour l'API ou le front)."""
-        # Hypothèse : les fichiers sont servis depuis /static/uploads/
-        return f"/static/uploads/{self.nom_fichier}"
+        # URL d'accès public au document (pour l'API ou le front).
+        # Les fichiers sont servis depuis /static, et `chemin` est relatif (ex: "static/uploads/<uuid>.ext").
+        # Normalise pour éviter les doubles slash/backslashes.
+        rel = (self.chemin or "").lstrip("/\\")
+        return f"/{rel}" if rel else "/static/uploads"
 
     def to_dict(self, include_sensitive: bool = False, include_relations: bool = False) -> Dict[str, Any]:
         data = {

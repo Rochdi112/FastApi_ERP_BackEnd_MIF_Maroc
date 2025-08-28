@@ -93,7 +93,9 @@ def send_email_notification(email_to: str, notification: Notification):
 
         html_content = template.render(
             type=notification.type_notification.value,
-            contenu=notification.contenu or "Voir détails dans l’application."
+            contenu=notification.contenu or "Voir détails dans l’application.",
+            sujet=subject,
+            message=notification.contenu or ""
         )
 
         msg = MIMEMultipart("alternative")
