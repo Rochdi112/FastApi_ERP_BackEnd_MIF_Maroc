@@ -8,6 +8,8 @@ from enum import Enum
 class InterventionType(str, Enum):
     corrective = "corrective"
     preventive = "preventive"
+    ameliorative = "ameliorative"
+    diagnostic = "diagnostic"
 
 class StatutIntervention(str, Enum):
     ouverte = "ouverte"
@@ -15,6 +17,7 @@ class StatutIntervention(str, Enum):
     en_cours = "en_cours"
     en_attente = "en_attente"
     cloturee = "cloturee"
+    annulee = "annulee"
     archivee = "archivee"
 
 class PrioriteIntervention(str, Enum):

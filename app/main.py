@@ -4,9 +4,14 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from app.core.logging import setup_logging, get_logger
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 import os
+
+# Setup logging first
+setup_logging()
+logger = get_logger(__name__)
 
 # Optional scheduler
 try:
@@ -105,6 +110,8 @@ try:
         notifications as notifications,
         documents as documents,
         filters as filters,
+        dashboard as dashboard,
+        health as health,
     )
 
     api_prefix = settings.API_V1_STR
@@ -118,6 +125,8 @@ try:
     app.include_router(notifications.router, prefix=api_prefix)
     app.include_router(documents.router, prefix=api_prefix)
     app.include_router(filters.router, prefix=api_prefix)
+    app.include_router(dashboard.router, prefix=api_prefix)
+    app.include_router(health.router, prefix=api_prefix)
     # Backward-compatible mounts at root for existing tests/tools
     app.include_router(auth.router)
     app.include_router(users.router)
@@ -128,6 +137,8 @@ try:
     app.include_router(notifications.router)
     app.include_router(documents.router)
     app.include_router(filters.router)
+    app.include_router(dashboard.router)
+    app.include_router(health.router)
     
 except ImportError as e:
     print(f"Erreur lors de l'import des routes: {e}")
@@ -142,10 +153,5 @@ def read_root():
         "docs": "/docs",
         "redoc": "/redoc"
     }
-
-# Route de santé
-@app.get("/health")
-def health_check():
-    return {"status": "ok"}
 
  # Les événements startup/shutdown sont maintenant gérés par lifespan ci-dessus

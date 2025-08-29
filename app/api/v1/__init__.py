@@ -9,6 +9,7 @@ from .planning import router as planning_router
 from .notifications import router as notifications_router
 from .documents import router as documents_router
 from .filters import router as filters_router
+from .dashboard import router as dashboard_router
 
 __all__ = [
     "auth_router",
@@ -19,5 +20,6 @@ __all__ = [
     "planning_router",
     "notifications_router",
     "documents_router",
-    "filters_router"
+    "filters_router",
+    "dashboard_router"
 ]

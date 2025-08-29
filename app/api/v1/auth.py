@@ -69,3 +69,34 @@ def get_me(current_user = Depends(get_current_user), db: Session = Depends(get_d
         from fastapi import HTTPException, status
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Utilisateur non trouvé")
     return user
+
+@router.post(
+    "/change-password",
+    summary="Changer le mot de passe",
+    description="Permet à l'utilisateur connecté de changer son mot de passe."
+)
+def change_password(
+    current_password: str = Form(...),
+    new_password: str = Form(...),
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """
+    Change le mot de passe de l'utilisateur connecté.
+    Vérifie d'abord l'ancien mot de passe.
+    """
+    from app.services.user_service import get_user_by_email, update_user_password
+    from app.services.auth_service import verify_password
+    from fastapi import HTTPException, status
+
+    user = get_user_by_email(db, current_user["email"])
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Utilisateur non trouvé")
+
+    # Vérifier l'ancien mot de passe
+    if not verify_password(current_password, user.hashed_password):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Mot de passe actuel incorrect")
+
+    # Mettre à jour le mot de passe
+    update_user_password(db, user.id, new_password)
+    return {"message": "Mot de passe changé avec succès"}

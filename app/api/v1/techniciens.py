@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from typing import List
-from app.db.database import get_db           # <-- Important : importer get_db (pas redéfinir)
+from app.db.database import get_db
 from app.schemas.technicien import (
     TechnicienCreate, TechnicienOut,
     CompetenceCreate, CompetenceOut
@@ -13,8 +13,10 @@ from app.services.technicien_service import (
     get_technicien_by_id,
     get_all_techniciens,
     create_competence,
-    get_all_competences
+    get_all_competences,
 )
+from app.models.technicien import Technicien as TechnicienModel, DisponibiliteTechnicien
+from app.schemas.technicien import TechnicienBase
 from app.core.rbac import responsable_required, get_current_user
 
 router = APIRouter(
@@ -75,3 +77,40 @@ def get_technicien(
     Récupère le détail d’un technicien par ID.
     """
     return get_technicien_by_id(db, technicien_id)
+
+@router.put("/{technicien_id}", response_model=TechnicienOut, summary="Mettre à jour un technicien")
+def update_technicien(
+    technicien_id: int,
+    data: TechnicienBase,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(responsable_required)
+):
+    t = db.query(TechnicienModel).filter(TechnicienModel.id == technicien_id).first()
+    if not t:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Technicien introuvable")
+    # Normalisation simple de la disponibilité si string
+    dispo = data.disponibilite
+    if isinstance(dispo, str) and dispo:
+        try:
+            t.disponibilite = DisponibiliteTechnicien(dispo.strip().lower())
+        except Exception:
+            pass
+    t.equipe = data.equipe if data.equipe is not None else t.equipe
+    db.commit()
+    db.refresh(t)
+    return t
+
+@router.delete("/{technicien_id}", summary="Supprimer un technicien", status_code=204)
+def delete_technicien(
+    technicien_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(responsable_required)
+):
+    t = db.query(TechnicienModel).filter(TechnicienModel.id == technicien_id).first()
+    if not t:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Technicien introuvable")
+    db.delete(t)
+    db.commit()
+    return

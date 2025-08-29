@@ -1,12 +1,14 @@
 # app/api/v1/documents.py
 
-from fastapi import APIRouter, Depends, UploadFile, File, status
+from fastapi import APIRouter, Depends, UploadFile, File, status, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from app.db.database import get_db
 from app.models.document import Document
 from app.schemas.document import DocumentOut
 from app.services.document_service import create_document
+from app.core.config import settings
+import os
 from app.core.rbac import technicien_required, responsable_required, admin_required
 
 router = APIRouter(
@@ -67,3 +69,33 @@ def list_documents(db: Session = Depends(get_db)):
 )
 def list_documents_by_intervention(intervention_id: int, db: Session = Depends(get_db)):
     return db.query(Document).filter(Document.intervention_id == intervention_id).all()
+
+@router.delete(
+    "/{document_id}",
+    status_code=status.HTTP_200_OK,
+    summary="Supprimer un document",
+    description="Supprime le document (enregistrement + fichier sur disque)",
+    dependencies=[Depends(admin_required)]
+)
+def delete_document(document_id: int, db: Session = Depends(get_db)):
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document non trouvé")
+    # Supprime le fichier physique si présent
+    try:
+        chemin = doc.chemin or ""
+        # chemin est de la forme "static/uploads/<uuid>.<ext>"; reconstruire chemin absolu
+        if chemin:
+            # settings.UPLOAD_DIRECTORY pointe vers .../app/static/uploads
+            uploads_dir = settings.UPLOAD_DIRECTORY
+            # On ne garde que le nom de fichier réel
+            filename = os.path.basename(chemin)
+            abs_path = os.path.join(uploads_dir, filename)
+            if os.path.isfile(abs_path):
+                os.remove(abs_path)
+    except Exception:
+        # On ne bloque pas la suppression DB si suppression fichier échoue
+        pass
+    db.delete(doc)
+    db.commit()
+    return {"detail": "Document supprimé"}

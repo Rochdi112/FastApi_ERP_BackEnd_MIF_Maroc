@@ -145,6 +145,14 @@ def update_user(db: Session, user_id: int, update_data: UserUpdate) -> User:
     db.refresh(user)
     return user
 
+def update_user_password(db: Session, user_id: int, new_password: str) -> None:
+    """
+    Met à jour uniquement le mot de passe d'un utilisateur.
+    """
+    user = get_user_by_id(db, user_id)
+    user.hashed_password = get_password_hash(new_password)
+    db.commit()
+
 def deactivate_user(db: Session, user_id: int) -> None:
     """
     Désactive un utilisateur (soft delete).
